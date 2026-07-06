@@ -1,7 +1,7 @@
 import os
 import asyncio
 from pyrogram import Client as Bot, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ChatMemberUpdated
 from pymongo import MongoClient
 
 
@@ -30,16 +30,16 @@ async def start(bot, message: Message):
     bot_username = bot_user.username
     
     text = (
-        '👋 Hey, I am Luxury Autoban Bot \n\n'
-        ' 💥Group ထဲကနေပွဲလာဖြစ်တဲ့သူတေကို သူတို့ထွက်တာနဲ့ Auto Banပါတယ်. \n\n'
-        '⚠️ Buddha Warning- Bot ကို Admin ပေးပါFamily Groupများ စိတ်ချစွားသုံးလို့ရပါတယ်'
+        '👋 Hey, I am Autoban Bot \n\n'
+        'I Can Ban a Member After Leaving The group. \n\n'
+        '⚠️ Warning- My use is for personal Groups.'
     )
     
     reply_markup = InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton(
-                    "➕ Groupထဲ သို့ ထဲ့ရန် ➕", 
+                    "➕ Add Me To Your Group ➕", 
                     url=f"https://t.me/{bot_username}?startgroup=true"
                 )
             ]
@@ -49,14 +49,23 @@ async def start(bot, message: Message):
     await message.reply(text, reply_markup=reply_markup, quote=True)
 
 
-@bot.on_message(filters.left_chat_member)
-async def ban_left_member(bot, m: Message):
+# 
+@bot.on_chat_member_updated()
+async def ban_left_member(bot, event: ChatMemberUpdated):
     try:
-        left_user = m.left_chat_member
-        await bot.ban_chat_member(m.chat.id, left_user.id)
-        print(f"Banned Left User: {left_user.id} in Chat: {m.chat.id}")
+        # 
+        if event.old_chat_member and not event.new_chat_member:
+            #
+            left_user = event.old_chat_member.user
+            chat_id = event.chat.id
+            
+            #
+            if left_user.id != bot.me.id:
+                await bot.ban_chat_member(chat_id, left_user.id)
+                print(f"✅ Banned Left User: {left_user.id} (Username: @{left_user.username}) in Chat: {chat_id}")
+                
     except Exception as e:
-        print(f"Error banning user: {e}")
+        print(f"❌ Error banning user: {e}")
 
 
 @bot.on_message(filters.group, group=-1)
@@ -64,23 +73,23 @@ async def track_groups(bot, m: Message):
     
     if not groups_col.find_one({"chat_id": m.chat.id}):
         groups_col.insert_one({"chat_id": m.chat.id})
-        print(f"New Group Added to Database: {m.chat.id}")
+        print(f"📝 New Group Added to Database: {m.chat.id}")
 
-# Broadcast System (Owner သာ သုံးခွင့်ရှိသည်)
+
+
 @bot.on_message(filters.command('broadcast') & filters.user(OWNER_ID))
 async def broadcast(bot, message: Message):
     if not message.reply_to_message and len(message.command) < 2:
-        await message.reply("သုံးစွဲပုံ - `/broadcast ပို့ချင်သောစာ` သို့မဟုတ် စာတစ်စောင်ကို reply ပြန်ပြီး `/broadcast` ဟု ရိုက်ပါ။")
+        await message.reply("သုံးစွဲပုံ - /broadcast ပို့ချင်သောစာ သို့မဟုတ် စာတစ်စောင်ကို reply ပြန်ပြီး /broadcast ဟု ရိုက်ပါ။")
         return
 
     msg_to_send = message.reply_to_message if message.reply_to_message else message
     text_mode = False if message.reply_to_message else True
 
-    status_msg = await message.reply("Broadcast စတင်ပို့ဆောင်နေပါပြီ...")
+    status_msg = await message.reply("📢 Broadcast စတင်ပို့ဆောင်နေပါပြီ...")
     success = 0
     failed = 0
 
-    
     all_groups = groups_col.find()
 
     for group in all_groups:
@@ -95,11 +104,10 @@ async def broadcast(bot, message: Message):
             await asyncio.sleep(0.3)
         except Exception as e:
             failed += 1
-            
             groups_col.delete_one({"chat_id": chat_id})
-            print(f"Failed to send to {chat_id} (Removed from DB): {e}")
+            print(f"❌ Failed to send to {chat_id} (Removed from DB): {e}")
 
-    await status_msg.edit(f"📢 **Broadcast ပို့ဆောင်ပြီးစီးပါပြီ!**\n\n✅ အောင်မြင် - {success} ခု\n❌ ကျရှုံး - {failed} ခု")
+    await status_msg.edit(f"📢 Broadcast ပို့ဆောင်ပြီးစီးပါပြီ!\n\n✅ အောင်မြင် - {success} ခု\n❌ ကျရှုံး - {failed} ခု")
 
 
 bot.run()
