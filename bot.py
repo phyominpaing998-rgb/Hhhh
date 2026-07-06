@@ -31,7 +31,7 @@ async def start(bot, message: Message):
     
     text = (
         '👋 Hey, I am Luxury Autoban Bot \n\n'
-        ' Group ထဲကနေပွဲလာဖြစ်တဲ့သူတေကို သူတို့ထွက်တာနဲ့ Auto Banပါတယ်. \n\n'
+        ' 💥Group ထဲကနေပွဲလာဖြစ်တဲ့သူတေကို သူတို့ထွက်တာနဲ့ Auto Banပါတယ်. \n\n'
         '⚠️ Buddha Warning- Bot ကို Admin ပေးပါFamily Groupများ စိတ်ချစွားသုံးလို့ရပါတယ်'
     )
     
