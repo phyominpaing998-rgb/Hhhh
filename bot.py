@@ -1,6 +1,6 @@
 import os
 import asyncio
-from pyrogram import Client as Bot, filters
+from pyrogram import Client as Bot, filters, enums
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ChatMemberUpdated
 from pymongo import MongoClient
 
@@ -49,23 +49,27 @@ async def start(bot, message: Message):
     await message.reply(text, reply_markup=reply_markup, quote=True)
 
 
-# 
+#
 @bot.on_chat_member_updated()
 async def ban_left_member(bot, event: ChatMemberUpdated):
     try:
-        # 
+        #
         if event.old_chat_member and not event.new_chat_member:
-            #
+            
+            if event.old_chat_member.status == enums.ChatMemberStatus.BANNED:
+                return  
+            
+            # 
             left_user = event.old_chat_member.user
             chat_id = event.chat.id
             
             #
             if left_user.id != bot.me.id:
                 await bot.ban_chat_member(chat_id, left_user.id)
-                print(f"✅ Banned Left User: {left_user.id} (Username: @{left_user.username}) in Chat: {chat_id}")
+                print(f"✅ Banned Left User: {left_user.id} in Chat: {chat_id}")
                 
     except Exception as e:
-        print(f"❌ Error banning user: {e}")
+        print(f"❌ Error: {e}")
 
 
 @bot.on_message(filters.group, group=-1)
@@ -76,7 +80,7 @@ async def track_groups(bot, m: Message):
         print(f"📝 New Group Added to Database: {m.chat.id}")
 
 
-
+# Broadcast System
 @bot.on_message(filters.command('broadcast') & filters.user(OWNER_ID))
 async def broadcast(bot, message: Message):
     if not message.reply_to_message and len(message.command) < 2:
