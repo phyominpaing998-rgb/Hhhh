@@ -30,16 +30,16 @@ async def start(bot, message: Message):
     bot_username = bot_user.username
     
     text = (
-        '👋 Hey, I am Autoban Bot \n\n'
-        'I Can Ban a Member After Leaving The group. \n\n'
-        '⚠️ Warning- My use is for personal Groups.'
+        '👋 Hey, I am Luxury Autoban Bot \n\n'
+        ' Group ထဲကနေပွဲလာဖြစ်တဲ့သူတေကို သူတို့ထွက်တာနဲ့ Auto Banပါတယ်. \n\n'
+        '⚠️ Buddha Warning- Bot ကို Admin ပေးပါFamily Groupများ စိတ်ချစွားသုံးလို့ရပါတယ်'
     )
     
     reply_markup = InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton(
-                    "➕ Add Me To Your Group ➕", 
+                    "➕ Groupထဲ သို့ ထဲ့ရန် ➕", 
                     url=f"https://t.me/{bot_username}?startgroup=true"
                 )
             ]
